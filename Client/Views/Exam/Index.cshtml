@@ -1,0 +1,143 @@
+﻿@model List<Data.Models.Exam>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<!-- Large button groups (default and split) -->
+<div class="btn-group col-5 mb-5">
+    <button class="btn  btn-secondary btn-lg dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+        Ders Listesi
+    </button>
+    <div class="dropdown-menu col-12 lessons">
+        <a class="dropdown-item lesson" href="#">Tüm Dersler</a>
+    </div>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Sınavlar</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Ders Adı</th>
+                        <th>Sınav Adı</th>
+                        <th>Detay</th>
+
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>Ders Adı</th>
+                        <th>Sınav Adı</th>
+                        <th>Detay</th>
+
+                    </tr>
+                </tfoot>
+                <tbody>
+                    @foreach (var item in Model)
+                        {
+                            if (item.Status)
+                            {
+                                <tr id="@item.Lesson.LessonId">
+                                    <td>
+                                        @item.Lesson.LessonName
+                                    </td>
+                                    <td>
+                                        @item.ExamName
+                                    </td>
+                                    <td>
+                                        <a href="/Exam/Detail/@item.ExamId" examId="@item.ExamId" lessonId="LID @item.Lesson.LessonId" class="btn btn-warning btn-icon-split">
+                                            <span class="icon text-white-50">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                            </span>
+                                            <span class="text">Detay</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    window.UserIds = [];
+    const getLessons = () => {
+        $.ajax({
+            url: "https://localhost:44314/api/lessons/",
+            type: "GET",
+            success: function (response) {
+                response.map((lesson) => {
+                    lesson.Users.map((user) => {
+                        window.UserIds.push({"LessonId":lesson.LessonId,"UserId" : user.UserId});
+                    });
+
+                    var userExists = lesson.Users.filter((user) => {
+                            return user.UserId === Number(sessionStorage.UserId)
+                    });
+
+                    if (userExists.length > 0) {
+                        var lessonHTML = $('a.lesson:first').clone();
+
+                        $(lessonHTML).text(lesson.LessonName);
+                        $(lessonHTML).attr('id', lesson.LessonId);
+                    
+
+                        $('a.lesson:contains(Tüm):first').remove();
+                        $('div.lessons').append(lessonHTML);
+                        $('.dropdown-menu a.lesson:first').trigger('click');
+                    }
+                });
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+    }
+
+    const filterByUser = (id, filtered) => {
+        typeof filtered === 'undefined'  ? filtered = fullData.filter((item, index) => (item[2].indexOf('LID ' + id) !== -1)) : filtered = filtered;
+
+        const filteredByUser = filtered.filter((item, index) => {
+            return UserIds.filter((lesson) => {
+                    return lesson.LessonId === 1;
+                }).filter((user) => {
+                    return user.UserId === Number(sessionStorage.UserId);
+                }).length > 0;
+        });
+
+        $("#dataTable").DataTable().clear();
+
+        $("#dataTable").DataTable().rows.add(filteredByUser).draw();
+
+        var button = $('tr a');
+        sessionStorage.UserTpe === 'false' && button.attr('href', 'exam/app/' + button.attr('examId')) && button.text('Sınavı Başlat');
+    }
+
+    const filterData = (id) => {
+        const filtered = fullData.filter((item, index) => item[2].indexOf('LID ' + id) !==-1);
+
+        filterByUser(id, filtered);
+    }
+
+    window.addEventListener('DOMContentLoaded',() => {
+        getLessons();
+        $("#dataTable").DataTable();
+        window.fullData = $("#dataTable").DataTable().data();
+        filterByUser($(this).attr('id'));
+        $(".dropdown-menu").on('click', 'a', function(){
+            $(".btn:first-child").text($(this).text());
+            $(".btn:first-child").val($(this).text());
+            filterData($(this).attr('id'));
+        });
+    });
+</script>
+

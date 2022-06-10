@@ -1,0 +1,62 @@
+﻿@model Data.Models.Exam
+@{
+    ViewBag.Title = "App";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+<div class="row">
+    <div class="col-md-3 sol-sm-12">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            SINAV ADI
+                        </div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            DERS ADI
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-info fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<div class="card">
+    @foreach (var item in Model.Questions)
+    {
+        <h5 class="card-header">Soru</h5>
+        <div class="card-body">
+
+            <p class="card-text">@item.QuestionContent</p>
+            <hr />
+
+            <hr />
+            <a class="btn btn-primary" id="@item.QuestionId" onclick="handleClick(@item.QuestionId)" style="margin-left:90%;color:#fff">Cevapla</a>
+        </div>
+    }
+    
+    
+    <a href="~/Home/Index" class="btn btn-primary"  style="margin-left:90%;color:#fff">Sınavı Bitir</a>
+</div>
+
+<script>
+    const handleClick = (id) => {
+        var questionId = id.toString();
+        var queryQuestionId = "#" + questionId;
+        console.log(queryQuestionId);
+        if ($(queryQuestionId).text() === "Cevapla") {
+            $(queryQuestionId).text('Cevaplanıyor');
+        } else if ($(queryQuestionId).text() === "Cevaplanıyor") {
+            $(queryQuestionId).text('Cevaplandı');
+        }
+        
+    }
+</script>

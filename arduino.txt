@@ -1,0 +1,42 @@
+const int answerButtonPin = 4;  
+const int potantiometerButtonPin = 8;  
+const int ledPin =  13;   
+const byte potantiometerPin = A0;   
+
+int answerButtonState = 0;
+int potantiometerButtonState = 0;        
+bool flag = true;
+bool potantiometerFlag = true;
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  pinMode(answerButtonPin, INPUT);
+  pinMode(potantiometerButtonPin, INPUT);
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  answerButtonState = digitalRead(answerButtonPin);
+  potantiometerButtonState = digitalRead(potantiometerButtonPin);
+  int potansiyoMetreDeger = analogRead(potantiometerPin);
+  
+  if (answerButtonState == HIGH) {
+    flag = false;
+
+    digitalWrite(ledPin, HIGH);
+    Serial.println("CBV");
+  }
+  
+   if (potantiometerButtonState == HIGH) {
+    flag = false;
+
+    Serial.println("CPV:");
+    Serial.println(potansiyoMetreDeger);
+  }
+  
+  if(answerButtonState == LOW){
+    flag=true;
+    digitalWrite(ledPin, LOW);
+  }
+ 
+}
